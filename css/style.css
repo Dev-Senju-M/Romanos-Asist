@@ -35,8 +35,8 @@ body::before{
   background-position:center center;
   background-size:cover;
   background-attachment:fixed;
-  opacity:0.16;
-  filter:saturate(0.85);
+  opacity:0.38;
+  filter:saturate(0.95);
 }
 body::after{
   content:'';
@@ -46,7 +46,7 @@ body::after{
   pointer-events:none;
   background:
     repeating-linear-gradient(transparent, transparent 38px, rgba(91,53,133,0.04) 39px),
-    radial-gradient(circle at 15% 0%, rgba(243,236,226,0.55), rgba(243,236,226,0.88) 55%, rgba(243,236,226,0.96) 100%);
+    radial-gradient(circle at 15% 0%, rgba(243,236,226,0.35), rgba(243,236,226,0.62) 55%, rgba(243,236,226,0.78) 100%);
 }
 .wrap, header, nav.tabs{ position:relative; z-index:1; }
 .wrap{max-width:920px; margin:0 auto; padding:0 24px;}
