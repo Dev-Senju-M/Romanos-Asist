@@ -6,10 +6,11 @@
   <title>Comision de Romanos - Cuaresma</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=2">
+  <link rel="stylesheet" href="css/style.css?v=3">
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
   <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon-180.png">
   <link rel="icon" type="image/png" sizes="512x512" href="assets/favicon-512.png">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -101,6 +102,7 @@
         <label for="rankMonthSelect">Mes</label>
         <select id="rankMonthSelect"></select>
       </div>
+      <button class="btn ghost" id="btnExportExcel" type="button" style="margin-bottom:18px;">Exportar a Excel</button>
       <table class="rank" id="rankTable" style="display:none;">
         <thead><tr><th>#</th><th>Integrante</th><th>A / Ex / F</th><th>Porcentaje</th><th>Puntaje</th><th>Progreso</th></tr></thead>
         <tbody id="rankBody"></tbody>
@@ -114,7 +116,7 @@
 <div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabaseClient.js?v=2"></script>
-<script src="js/app.js?v=2"></script>
+<script src="js/supabaseClient.js?v=3"></script>
+<script src="js/app.js?v=3"></script>
 </body>
 </html>
