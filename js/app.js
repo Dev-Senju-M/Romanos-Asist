@@ -238,48 +238,135 @@
     return 0;
   }
 
+  function percentFor(mark) {
+    if (mark === "A") return 100;
+    if (mark === "Ex") return 50;
+    return 0;
+  }
+
+  function monthKey(iso) {
+    return iso.slice(0, 7); // "YYYY-MM"
+  }
+
+  function monthLabel(key) {
+    const d = new Date(key + "-01T00:00:00");
+    const label = d.toLocaleDateString("es-ES", { month: "long", year: "numeric" });
+    return label.charAt(0).toUpperCase() + label.slice(1);
+  }
+
+  function getMonthKeys() {
+    const keys = Array.from(new Set(events.map((ev) => monthKey(ev.event_date))));
+    keys.sort();
+    return keys;
+  }
+
+  function renderRankMonthSelect() {
+    const sel = document.getElementById("rankMonthSelect");
+    const prev = sel.value;
+    const keys = getMonthKeys();
+    sel.innerHTML = "";
+
+    keys.forEach((key) => {
+      const opt = document.createElement("option");
+      opt.value = key;
+      opt.textContent = monthLabel(key);
+      sel.appendChild(opt);
+    });
+
+    if (keys.length > 0) {
+      const optAll = document.createElement("option");
+      optAll.value = "__all__";
+      optAll.textContent = "Todos los meses (total)";
+      sel.appendChild(optAll);
+    }
+
+    if (prev && (keys.includes(prev) || prev === "__all__")) {
+      sel.value = prev;
+    } else if (keys.length > 0) {
+      sel.value = keys[keys.length - 1]; // mes mas reciente por defecto
+    }
+  }
+
+  function computeMonthRows(monthEvents) {
+    const numEvents = monthEvents.length;
+    return members.map((m) => {
+      let a = 0, ex = 0, f = 0, percentSum = 0;
+      monthEvents.forEach((ev) => {
+        const mark = (attendanceByEvent[ev.id] || {})[m.id];
+        if (mark === "A") a++;
+        else if (mark === "Ex") ex++;
+        else f++;
+        percentSum += percentFor(mark);
+      });
+      const pct = numEvents > 0 ? percentSum / numEvents : 0;
+      const pts = (pct / 100) * 20;
+      return { name: m.name, a, ex, f, pct, pts };
+    });
+  }
+
   function renderRanking() {
     const table = document.getElementById("rankTable");
     const empty = document.getElementById("rankEmpty");
     const body = document.getElementById("rankBody");
     body.innerHTML = "";
 
+    renderRankMonthSelect();
+    const sel = document.getElementById("rankMonthSelect");
+    const monthKeys = getMonthKeys();
+
     const hasAnyMark = Object.values(attendanceByEvent).some((byMember) => Object.keys(byMember).length > 0);
 
-    if (members.length === 0 || !hasAnyMark) {
+    if (members.length === 0 || monthKeys.length === 0 || !hasAnyMark) {
       table.style.display = "none";
       empty.style.display = "block";
       return;
     }
 
-    const maxPossible = events.length * 3;
-    const rows = members.map((m) => {
-      let a = 0, ex = 0, f = 0, pts = 0;
-      events.forEach((ev) => {
-        const mark = (attendanceByEvent[ev.id] || {})[m.id];
-        if (mark === "A") a++;
-        else if (mark === "Ex") ex++;
-        else if (mark) f++;
-        pts += pointsFor(mark);
+    const selected = sel.value;
+    let rows;
+    let maxPts;
+
+    if (selected === "__all__") {
+      maxPts = 20 * monthKeys.length;
+      const totals = {};
+      members.forEach((m) => { totals[m.name] = { name: m.name, a: 0, ex: 0, f: 0, pts: 0 }; });
+      monthKeys.forEach((key) => {
+        const monthEvents = events.filter((ev) => monthKey(ev.event_date) === key);
+        computeMonthRows(monthEvents).forEach((r) => {
+          const t = totals[r.name];
+          t.a += r.a;
+          t.ex += r.ex;
+          t.f += r.f;
+          t.pts += r.pts;
+        });
       });
-      return { name: m.name, a, ex, f, pts };
-    }).sort((x, y) => y.pts - x.pts);
+      rows = Object.values(totals);
+    } else {
+      maxPts = 20;
+      const monthEvents = events.filter((ev) => monthKey(ev.event_date) === selected);
+      rows = computeMonthRows(monthEvents);
+    }
+
+    rows.sort((x, y) => y.pts - x.pts);
 
     empty.style.display = "none";
     table.style.display = "table";
 
     rows.forEach((r, i) => {
       const tr = document.createElement("tr");
-      const pct = maxPossible > 0 ? Math.round((r.pts / maxPossible) * 100) : 0;
+      const pct = maxPts > 0 ? Math.round((r.pts / maxPts) * 100) : 0;
       tr.innerHTML =
         "<td class=\"pos" + (i === 0 ? " gold" : "") + "\">" + (i + 1) + "</td>" +
         "<td>" + escapeHtml(r.name) + "</td>" +
         "<td class=\"counts\">" + r.a + " A - " + r.ex + " Ex - " + r.f + " F</td>" +
-        "<td class=\"pts\">" + r.pts + " pts</td>" +
+        "<td class=\"pts\">" + pct + "%</td>" +
+        "<td class=\"pts\">" + r.pts.toFixed(1) + " / " + maxPts + " pts</td>" +
         "<td><div class=\"bar-bg\"><div class=\"bar-fill\" style=\"width:" + pct + "%\"></div></div></td>";
       body.appendChild(tr);
     });
   }
+
+  document.getElementById("rankMonthSelect").addEventListener("change", renderRanking);
 
   document.querySelectorAll("nav.tabs button").forEach((btn) => {
     btn.addEventListener("click", () => {

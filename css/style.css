@@ -45,8 +45,8 @@ body::after{
   z-index:0;
   pointer-events:none;
   background:
-          repeating-linear-gradient(transparent, transparent 38px, rgba(91,53,133,0.04) 39px),
-          radial-gradient(circle at 15% 0%, rgba(243,236,226,0.35), rgba(243,236,226,0.62) 55%, rgba(243,236,226,0.78) 100%);
+    repeating-linear-gradient(transparent, transparent 38px, rgba(91,53,133,0.04) 39px),
+    radial-gradient(circle at 15% 0%, rgba(243,236,226,0.35), rgba(243,236,226,0.62) 55%, rgba(243,236,226,0.78) 100%);
 }
 .wrap, header, nav.tabs{ position:relative; z-index:1; }
 .wrap{max-width:920px; margin:0 auto; padding:0 24px;}
